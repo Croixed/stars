@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      /* set the background to be a gradient that's dark purple */
+      background: linear-gradient(180deg, #322033, #0a0d31);
+      
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.117.1/build/three.min.js"></script>
+
+
+  <script>
+    // First, we create a scene
+    var scene = new THREE.Scene();
+    
+    // Next, we create a camera
+    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+      
+    // Then, we create a renderer
+    var renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    // renderer.setCLearColor(0xffffff, 0);
+    document.body.appendChild( renderer.domElement );
+      
+    // Now, we create the stars.
+    // We will create a single geometry for all of the stars,
+    // which we will then duplicate and position to create the twinkling effect.
+    var starGeometry = new THREE.Geometry();
+      
+    // To create the twinkling effect, we will randomly offset the position
+    // of each star slightly on each frame.
+    var starPositions = [];
+
+    // set background color on scene to transaprent
+    // scene.background = new THREE.Color( 0xffffff );
+
+    const sizes = {
+      width: window.innerWidth,
+      height: window.innerHeight
+    }
+
+
+      
+    // Create the individual stars and add them to the geometry.
+    for (var i = 0; i < 6000; i++) {
+      // make sure stars aren't shaped like square
+      var star = new THREE.Vector3();
+      star.x = THREE.MathUtils.randFloatSpread(1000);
+      star.y = THREE.MathUtils.randFloatSpread(1000);
+      star.z = THREE.MathUtils.randFloatSpread(1000);
+      let tempDistance = star.distanceTo(camera.position);
+
+      if (tempDistance > 200) {
+        starGeometry.vertices.push(star);
+        starPositions.push({ x: star.x, y: star.y, z: star.z });
+      } else {
+        star.x = THREE.MathUtils.randFloatSpread(1000);
+        star.y = THREE.MathUtils.randFloatSpread(1000);
+        star.z = THREE.MathUtils.randFloatSpread(1000);
+
+        starGeometry.vertices.push(star);
+        // console.log(star.x);
+        starPositions.push({ x: star.x * 2, y: star.y * 2, z: star.z * 2 });
+
+
+      }
+      }
+
+
+      // starGeometry.vertices.push(star);
+
+      // use distanceTo to determine the distance to the camera
+
+
+      // console.log(tempDistance);
+
+      // set a transparent color
+
+
+      
+    // Create a material for the stars.
+    var starMaterial = new THREE.PointsMaterial({ color: 0xFFFFFF });
+    
+    var darkStarMaterial = new THREE.PointsMaterial({ color: 0x030303 });
+      
+    // Create a particle system to hold the stars.
+    var starParticleSystem = new THREE.Points( starGeometry, starMaterial );
+      
+    // Add the particle system to the scene.
+    scene.add( starParticleSystem );
+      
+    // Animate the stars by updating their positions on each frame.
+    function animate() {
+      requestAnimationFrame( animate );
+      
+      // console.log(starParticleSystem)
+      // Update the positions of the stars.
+      for (var i = 0; i < starPositions.length; i++) {
+        var star = starParticleSystem.geometry.vertices[i];
+        var pos = starPositions[i];
+      
+        // Randomly offset the position of the star - originally 0.002
+        star.x = pos.x + 0.5 * Math.sin(0.1 * i + Date.now() * 0.001);
+        star.y = pos.y + 0.3 * Math.cos(0.1 * i + Date.now() * 0.003);
+        star.z = pos.z + 0.3 * Math.sin(0.1 * i + Date.now() * 0.003);
+        // star.x = pos.x + 0.3 * Math.sin(0.1 * i + Date.now() * 0.002);
+        // star.y = pos.y + 0.3 * Math.cos(0.1 * i + Date.now() * 0.002);
+        // star.z = pos.z + 0.3 * Math.sin(0.1 * i + Date.now() * 0.002);
+
+        star.material = darkStarMaterial;
+        
+
+        
+      }
+      
+      // Tell the particle system to update and render.
+      starParticleSystem.geometry.verticesNeedUpdate = true;
+      starParticleSystem.geometry.computeBoundingSphere();
+      
+      renderer.render( scene, camera );
+    }
+    console.log(starParticleSystem.material.color)
+    animate();
+  </script>
+  
+</body>
+</html>
